@@ -57,8 +57,13 @@ TargetScout.prototype._processTargets = function(targets) {
       }
   
       if (tenant) {
+        delete self.server._jsDevices[tenant.id];
+        tenant.id = tenantId;
+        self.server._jsDevices[tenant.id] = tenant;
         self._router.findAll(tenantId, function(err, results) {
-          tenant.updateRouter(results);
+          if (!err && results) {
+            tenant.updateRouter(results);
+          }
           self._router.on('change', function(results) {
             tenant.updateRouter(results.filter(function(peer) { return peer.tenantId === tenantId}));
           });
