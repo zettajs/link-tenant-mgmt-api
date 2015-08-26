@@ -1,0 +1,17 @@
+{
+  "name": "",
+  "private": true,
+  "version": "0.0.1",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "argo-formatter-siren": "0.0.0",
+    "titan": "^0.1.3",
+    "zetta": "^0.25.0"
+  }
+}
