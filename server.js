@@ -2,7 +2,7 @@ var path = require('path');
 var titan = require('titan');
 var siren = require('argo-formatter-siren');
 var TenantsResource = require('./resources/tenants');
-var TenantClient = require('./clients/tenants_client');
+var TenantsClient = require('./clients/tenants_client');
 
 var opts = {
   host: process.env.COREOS_PRIVATE_IPV4
@@ -13,7 +13,8 @@ if (process.env.ETCD_PEER_HOSTS) {
   opts.host = process.env.ETCD_PEER_HOSTS.split(',');
 }
 
-var tenantClient = new TenantClient(opts);
+var tenantClient = new TenantsClient(opts);
+var PORT = process.env.PORT || 2000;
 
 titan()
   .allow('*')
@@ -21,4 +22,4 @@ titan()
   .logger()
   .format({ engines: [siren], override: { 'application/json': siren } })
   .add(TenantsResource, tenantClient)
-  .listen(2000);
+  .listen(PORT);

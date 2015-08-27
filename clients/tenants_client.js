@@ -105,7 +105,7 @@ Tenants.prototype._getPeersDevices = function(peer, cb) {
       var devices = json.entities.filter(function(entry) {
         return entry.class.indexOf('device') >= 0;
       }).map(function(device) {
-        return { id: device.properties.id, properties: device.properties };
+        return { peer: peer.name, id: device.properties.id, properties: device.properties };
       });
       
       return cb(null, devices);

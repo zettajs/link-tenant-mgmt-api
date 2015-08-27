@@ -105,6 +105,7 @@ describe('Tenant client', function() {
       assert.equal(devices.length, 4);
       devices.forEach(function(device) {
         assert(device.id);
+        assert(device.peer);
         assert(device.properties);
       })
       done();

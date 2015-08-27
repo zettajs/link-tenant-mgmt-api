@@ -13,9 +13,9 @@ module.exports = function(model) {
   entity.entities = model.tenants.map(function(item) {
     var tenant = {
       class: ['tenant'],
+      rel: ['item'],
       properties: {
-        tenantId: item.tenantId,
-        totalPeers: 0
+        tenantId: item.tenantId
       },
       links: [
         { rel: ['self'], href: env.helpers.url.join(item.tenantId) }
