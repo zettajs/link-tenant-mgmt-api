@@ -1,7 +1,40 @@
 # Link Tenant Management API
 
+Currently a readonly API for accessing tenant information. Returns list of tenants, peers and devices connected to tenant. Peers and devices are cached to for 10 and 60 seconds, respectively.
 
 ## API Response
+
+### GET /
+
+```json
+HTTP/1.1 200 OK
+Content-Type: application/json
+Access-Control-Allow-Origin: *
+Content-Length: 159
+Date: Thu, 27 Aug 2015 14:26:37 GMT
+Connection: keep-alive
+
+{
+  "class": [
+    "root"
+  ],
+  "links": [
+    {
+      "rel": [
+        "self"
+      ],
+      "href": "http://localhost:2000/"
+    },
+    {
+      "rel": [
+        "http://rels.zettajs.io/tenants"
+      ],
+      "href": "http://localhost:2000/tenants"
+    }
+  ]
+}
+
+```
 
 ### GET /tenants
 
