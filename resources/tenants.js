@@ -9,7 +9,7 @@ var Tenants = module.exports = function(tenantsClient) {
 
 Tenants.prototype.init = function(config) {
   config
-    .path('/')
+    .path('/tenants')
     .produces('application/json')
     .produces('application/vnd.siren+json')
     .consumes('application/json')

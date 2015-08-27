@@ -19,7 +19,7 @@ describe('Tenants API', function() {
   var server = null;
   var tenantId = 'example-tenant';
   var tenantId2 = 'example-tenant2';
-  var base = '';
+  var base = '/tenants';
 
   beforeEach(function(done) {
     client = new TenantsClient({ client: new MockEtcd });

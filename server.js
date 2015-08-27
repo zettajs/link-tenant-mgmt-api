@@ -1,6 +1,7 @@
 var path = require('path');
 var titan = require('titan');
 var siren = require('argo-formatter-siren');
+var RootResource = require('./resources/root');
 var TenantsResource = require('./resources/tenants');
 var TenantsClient = require('./clients/tenants_client');
 
@@ -21,5 +22,6 @@ titan()
   .compress()
   .logger()
   .format({ engines: [siren], override: { 'application/json': siren } })
+  .add(RootResource)
   .add(TenantsResource, tenantClient)
   .listen(PORT);
