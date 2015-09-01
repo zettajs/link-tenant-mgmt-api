@@ -14,8 +14,7 @@ Tenants.prototype.init = function(config) {
     .produces('application/vnd.siren+json')
     .consumes('application/json')
     .get('/', this.list)
-    .get('/{id}', this.show)
-    .get('/{id}/devices', this.showDevices)
+    .get('/{id}', this.show);
 };
 
 Tenants.prototype.list = function(env, next) {
@@ -52,43 +51,16 @@ Tenants.prototype.show = function(env, next) {
       
       tenant.peers = peers;
 
-      self._devicesWithCache(tenantId, function(err, devices) {
+      self._devicesWithCache(tenantId, function(err, count) {
         if (err) {
           env.response.statusCode = 500;
           return next(env);
         }
         
-        tenant.devices = devices;
+        tenant.devicesCount = count;
         env.format.render('tenant', { env: env, tenant: tenant });
         next(env);
       });
-    });
-  });
-};
-
-Tenants.prototype.showDevices = function(env, next) {
-  var self = this;
-  var tenantId = env.route.params.id;
-  this._tenants.get(tenantId, function(err, tenant) {
-    if (err) {
-      env.response.statusCode = 500;
-      return next(env);
-    }
-
-    if (!tenant) {
-      env.response.statusCode = 404;
-      return next(env);
-    }
-
-    self._devicesWithCache(tenantId, function(err, devices) {
-      if (err) {
-        env.response.statusCode = 500;
-        return next(env);
-      }
-      
-      tenant.devices = devices;
-      env.format.render('devices', { env: env, tenant: tenant });
-      next(env);
     });
   });
 };
@@ -121,8 +93,8 @@ Tenants.prototype._devicesWithCache = function(tenantId, cb) {
       if (err) {
         return cb(err);
       }
-      cache.put(key, devices, self.devicesCacheTimeout);
-      cb(null, devices);
+      cache.put(key, devices.length, self.devicesCacheTimeout);
+      cb(null, devices.length);
     });
   } else {
     setImmediate(function() {

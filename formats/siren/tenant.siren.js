@@ -7,25 +7,20 @@ module.exports = function(contex) {
     properties: {
       tenantId: tenant.tenantId,
       totalPeers: tenant.peers.length,
-      totalDevices: tenant.devices.length
+      totalDevices: tenant.devicesCount,
+      tenants: []
     },
-    entities: [],
     links: [
       { rel: ['collection'], href: env.helpers.url.path('/tenants') },
-      { rel: ['http://rels.zettajs.io/devices'], href: env.helpers.url.join('/devices') },
       { rel: ['self'], href: env.helpers.url.current() }
     ]
   };
 
-  entity.entities = tenant.peers.map(function(item) {
+  entity.properties.tenants = tenant.peers.map(function(item) {
     var peer = {
-      class: ['peer'],
-      properties: {
-        name: item.name,
-        tenantId: item.tenantId,
-        created: item.created
-      },
-      rel: ['http://rels.zettajs.io/peer']
+      name: item.name,
+      tenantId: item.tenantId,
+      created: item.created
     };
 
     return peer;

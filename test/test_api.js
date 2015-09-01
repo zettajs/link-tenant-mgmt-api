@@ -116,15 +116,13 @@ describe('Tenants API', function() {
         var devices = body.links.filter(function(link) {
           return link.rel.indexOf("http://rels.zettajs.io/devices") >= 0;
         });
-        assert.equal(devices.length, 1);
+        assert.equal(devices.length, 0);
 
-        assert.equal(body.entities.length, 2);
-        body.entities.forEach(function(entry) {
-          assert(entry.class.indexOf('peer') >= 0);
-          assert(entry.rel.indexOf('http://rels.zettajs.io/peer') >= 0);
-          assert.equal(entry.properties.tenantId, tenantId);
-          assert(entry.properties.name);
-          assert(entry.properties.created);
+        assert.equal(body.properties.tenants.length, 2);
+        body.properties.tenants.forEach(function(entry) {
+          assert.equal(entry.tenantId, tenantId);
+          assert(entry.name);
+          assert(entry.created);
         });
 
       }))
@@ -153,35 +151,6 @@ describe('Tenants API', function() {
           }))
       }))
       .end(done);
-  })
-
-
-  it('GET ' + base + '/' + tenantId + '/devices return devices', function(done) {
-    request(server)
-      .get(base + '/' + tenantId + '/devices')
-      .expect(200)
-      .expect(getBody(function(res, body) {
-        assert(body.class.indexOf('devices') >= 0)
-        var self = body.links.filter(function(link) {
-          return link.rel.indexOf('self') >= 0;
-        });
-        assert.equal(self.length, 1);
-
-        var up = body.links.filter(function(link) {
-          return link.rel.indexOf('up') >= 0;
-        });
-        assert.equal(up.length, 1);
-
-        
-        assert.equal(body.properties.tenantId, tenantId);
-        assert.equal(body.properties.totalDevices, 4);
-        assert.equal(body.entities.length, 4);
-        body.entities.forEach(function(entry) {
-          assert(entry.properties.id);
-          assert(entry.properties.peer);
-        })
-      }))
-      .end(done);    
   })
 
 });
