@@ -16,7 +16,7 @@ module.exports = function(contex) {
     ]
   };
 
-  entity.properties.tenants = tenant.peers.map(function(item) {
+  entity.properties.peers = tenant.peers.map(function(item) {
     var peer = {
       name: item.name,
       tenantId: item.tenantId,

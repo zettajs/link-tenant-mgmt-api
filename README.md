@@ -101,7 +101,7 @@ Connection: keep-alive
     "tenantId": "default",
     "totalPeers": 2,
     "totalDevices": 4,
-    "tenants": [
+    "peers": [
       {
         "name": "5372531a-5d89-47cc-8132-887455116d26",
         "tenantId": "default",

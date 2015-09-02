@@ -118,8 +118,8 @@ describe('Tenants API', function() {
         });
         assert.equal(devices.length, 0);
 
-        assert.equal(body.properties.tenants.length, 2);
-        body.properties.tenants.forEach(function(entry) {
+        assert.equal(body.properties.peers.length, 2);
+        body.properties.peers.forEach(function(entry) {
           assert.equal(entry.tenantId, tenantId);
           assert(entry.name);
           assert(entry.created);
