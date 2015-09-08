@@ -7,7 +7,6 @@ module.exports = function(contex) {
     properties: {
       tenantId: tenant.tenantId,
       totalPeers: tenant.peers.length,
-      totalDevices: tenant.devicesCount,
       tenants: []
     },
     links: [

@@ -111,7 +111,6 @@ describe('Tenants API', function() {
 
         assert.equal(body.properties.tenantId, tenantId);
         assert.equal(body.properties.totalPeers, 2);
-        assert.equal(body.properties.totalDevices, 4);
 
         var devices = body.links.filter(function(link) {
           return link.rel.indexOf("http://rels.zettajs.io/devices") >= 0;

@@ -4,7 +4,6 @@ var cache = require('memory-cache');
 var Tenants = module.exports = function(tenantsClient) {
   this._tenants = tenantsClient;
   this.peersCacheTimeout = 10000;
-  this.devicesCacheTimeout = 60000;
 };
 
 Tenants.prototype.init = function(config) {
@@ -50,17 +49,8 @@ Tenants.prototype.show = function(env, next) {
       }
       
       tenant.peers = peers;
-
-      self._devicesWithCache(tenantId, function(err, count) {
-        if (err) {
-          env.response.statusCode = 500;
-          return next(env);
-        }
-        
-        tenant.devicesCount = count;
-        env.format.render('tenant', { env: env, tenant: tenant });
-        next(env);
-      });
+      env.format.render('tenant', { env: env, tenant: tenant });
+      next(env);
     });
   });
 };
@@ -80,25 +70,6 @@ Tenants.prototype._peersWithCache = function(tenantId, cb) {
   } else {
     setImmediate(function() {
       cb(null, peers);
-    });
-  }
-};
-
-Tenants.prototype._devicesWithCache = function(tenantId, cb) {
-  var self = this;
-  var key = 'devices/' + tenantId;
-  var devices = cache.get(key);
-  if (devices === null) {
-    this._tenants.devices(tenantId, function(err, devices) {
-      if (err) {
-        return cb(err);
-      }
-      cache.put(key, devices.length, self.devicesCacheTimeout);
-      cb(null, devices.length);
-    });
-  } else {
-    setImmediate(function() {
-      cb(null, devices);
     });
   }
 };
