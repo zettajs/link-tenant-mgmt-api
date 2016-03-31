@@ -16,7 +16,7 @@ module.exports = function(contex) {
         href: env.helpers.url.current(),
         type: 'application/x-www-form-urlencoded'
       }  
-    ]
+    ],
     links: [
       { rel: ['collection'], href: env.helpers.url.path('/tenants') },
       { rel: ['self'], href: env.helpers.url.current() }

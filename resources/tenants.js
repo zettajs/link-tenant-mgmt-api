@@ -85,7 +85,7 @@ Tenants.prototype._evictTenant = function(tenantId, cb) {
 Tenants.prototype._evictTenant = function(tenantId, cb) {
   var key = 'peers/' + tenantId;
   cache.del(key);
-  this._tenants.removeTenant(tenantId, function(err) {
+  this._tenants.remove(tenantId, function(err) {
     if(err) {
       return cb(err);
     }
@@ -94,7 +94,7 @@ Tenants.prototype._evictTenant = function(tenantId, cb) {
   });
 };
 
-Tenants.prototype.del = function(tenantId, cb) {
+Tenants.prototype.del = function(env, next) {
   var self = this;
   var tenantId = env.route.params.id;
   this._tenants.get(tenantId, function(err, tenant) {
@@ -114,7 +114,7 @@ Tenants.prototype.del = function(tenantId, cb) {
         return next(env);
       }      
       
-      if(peers.length > 0} {
+      if(peers.length > 0) {
         env.response.statusCode = 501;
         return next(env);
       } else {
