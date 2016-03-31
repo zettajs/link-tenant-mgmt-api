@@ -156,7 +156,7 @@ RouterClient.prototype.remove = function(tenantId, targetName, cb) {
 };
 
 RouterClient.prototype.removeTenantDirectory = function(tenantId, cb) {
-  var dir = this.etcDirectory + '/' + tenantId;
+  var dir = this._etcDirectory + '/' + tenantId;
   this._client.rmdir(dir, function(err, results) {
     if(err) {
       cb(err);
