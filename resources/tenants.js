@@ -1,5 +1,6 @@
 var path = require('path');
 var cache = require('memory-cache');
+var async = require('async');
 
 var Tenants = module.exports = function(tenantsClient) {
   this._tenants = tenantsClient;
@@ -13,7 +14,8 @@ Tenants.prototype.init = function(config) {
     .produces('application/vnd.siren+json')
     .consumes('application/json')
     .get('/', this.list)
-    .get('/{id}', this.show);
+    .get('/{id}', this.show)
+    .del('/{id}', this.del);
 };
 
 Tenants.prototype.list = function(env, next) {
@@ -73,3 +75,61 @@ Tenants.prototype._peersWithCache = function(tenantId, cb) {
     });
   }
 };
+
+Tenants.prototype._evictTenant = function(tenantId, cb) {
+  var key = 'peers/' + tenantId;
+  cache.del(key);
+    
+};
+
+Tenants.prototype._evictTenant = function(tenantId, cb) {
+  var key = 'peers/' + tenantId;
+  cache.del(key);
+  this._tenants.removeTenant(tenantId, function(err) {
+    if(err) {
+      return cb(err);
+    }
+
+    cb();
+  });
+};
+
+Tenants.prototype.del = function(tenantId, cb) {
+  var self = this;
+  var tenantId = env.route.params.id;
+  this._tenants.get(tenantId, function(err, tenant) {
+    if (err) {
+      env.response.statusCode = 500;
+      return next(env);
+    }
+
+    if (!tenant) {
+      env.response.statusCode = 404;
+      return next(env);
+    }
+
+    self._peersWithCache(tenantId, function(err, peers) {
+      if(err) {
+        env.response.statusCode = 400;
+        return next(env);
+      }      
+      
+      if(peers.length > 0} {
+        env.response.statusCode = 501;
+        return next(env);
+      } else {
+        self._evictTenant(tenantId, function(err) {
+          if(err) {
+            env.response.statusCode = 500;
+            return next(env);
+          } else {
+            env.response.statusCode = 200;
+            return next(env); 
+          }
+        });
+      }
+      next(env);
+    });
+  });
+
+}

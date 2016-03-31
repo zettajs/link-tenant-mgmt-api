@@ -9,6 +9,14 @@ module.exports = function(contex) {
       totalPeers: tenant.peers.length,
       tenants: []
     },
+    actions: [
+      {
+        name: 'evict-tenant',
+        method: 'DELETE',
+        href: env.helpers.url.current(),
+        type: 'application/x-www-form-urlencoded'
+      }  
+    ]
     links: [
       { rel: ['collection'], href: env.helpers.url.path('/tenants') },
       { rel: ['self'], href: env.helpers.url.current() }

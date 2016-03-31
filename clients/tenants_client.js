@@ -135,3 +135,38 @@ Tenants.prototype._processTenantsList = function(results, cb) {
 
   return cb(null, allTenants);
 };
+
+Tenants.prototype.remove = function(tenantId, targetName, cb) {
+  var self = this;
+  this._router.removeTenantDirectory(tenantId, function(err) {
+    if(err) {
+      return cb(err);
+    }
+
+    self._targets.findAll(function(err, results) {
+      if(err) {
+        return cb(err);
+      }
+
+      async.map(results, function(target, cb) {
+        if(!target.tenantId || target.tenantId != tenantId) {
+          return cb();
+        } 
+
+        self._targets.remove('', target.url, function(err) {
+          if(err) {
+            return cb(err);
+          }
+
+          return cb();
+        });
+      }, function(err, results) {
+        if(err) {
+          return cb(err);
+        }
+
+        return cb();
+      });
+    });
+  });
+};

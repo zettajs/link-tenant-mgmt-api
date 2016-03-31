@@ -154,3 +154,15 @@ RouterClient.prototype.remove = function(tenantId, targetName, cb) {
     cb();
   });
 };
+
+RouterClient.prototype.removeTenantDirectory = function(tenantId, cb) {
+  var dir = this.etcDirector + '/' + tenantId;
+  this._client.rmdir(dir, function(err, results) {
+    if(err) {
+      cb(err);
+      return;
+    }
+
+    cb();
+  });
+}
