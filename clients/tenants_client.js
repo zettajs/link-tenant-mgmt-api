@@ -136,7 +136,7 @@ Tenants.prototype._processTenantsList = function(results, cb) {
   return cb(null, allTenants);
 };
 
-Tenants.prototype.remove = function(tenantId, targetName, cb) {
+Tenants.prototype.remove = function(tenantId, cb) {
   var self = this;
   this._router.removeTenantDirectory(tenantId, function(err) {
     if(err) {
