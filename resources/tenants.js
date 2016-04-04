@@ -110,12 +110,12 @@ Tenants.prototype.del = function(env, next) {
 
     self._peersWithCache(tenantId, function(err, peers) {
       if(err) {
-        env.response.statusCode = 400;
+        env.response.statusCode = 500;
         return next(env);
       }      
       
       if(peers.length > 0) {
-        env.response.statusCode = 501;
+        env.response.statusCode = 500;
         return next(env);
       } else {
         self._evictTenant(tenantId, function(err) {
@@ -123,7 +123,7 @@ Tenants.prototype.del = function(env, next) {
             env.response.statusCode = 500;
             return next(env);
           } else {
-            env.response.statusCode = 200;
+            env.response.statusCode = 204;
             return next(env); 
           }
         });
