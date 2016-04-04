@@ -138,35 +138,76 @@ Tenants.prototype._processTenantsList = function(results, cb) {
 
 Tenants.prototype.remove = function(tenantId, cb) {
   var self = this;
-  this._router.removeTenantDirectory(tenantId, function(err) {
+  async.parallel({
+    router: function(cb) {
+      self._freeTenantDirectory(tenantId, function(err) {
+        if(err) {
+          return cb(err);
+        }
+
+        cb();
+      })        
+    },
+    targets: function(cb) {
+      self._freeTargets(tenantId, function(err) {
+        if(err) {
+          return cb(err);
+        } 
+
+        cb();
+      });  
+    }
+  }, function(err, results) {
+    if(err) {
+      return cb(err);
+    }  
+  }); 
+};
+
+Tenants.prototype._freeTenantDirectory = function(tenantId, cb) {
+  var self = this;
+
+  this._router.get(tenantId, function(err) {
+    if(!err) {
+      self._router.removeTenantDirectory(tenantId, function(err) {
+        if(err) {
+          return cb(err);
+        }
+        
+        cb();
+
+      });
+    } else {
+      cb();
+    }
+  });
+}
+
+Tenants.prototype._freeTargets = function(tenantId, cb) {
+  var self = this;
+  self._targets.findAll(function(err, results) {
     if(err) {
       return cb(err);
     }
 
-    self._targets.findAll(function(err, results) {
-      if(err) {
-        return cb(err);
-      }
+    async.map(results, function(target, cb) {
+      if(!target.tenantId || target.tenantId != tenantId) {
+        return cb();
+      } 
 
-      async.map(results, function(target, cb) {
-        if(!target.tenantId || target.tenantId != tenantId) {
-          return cb();
-        } 
-
-        self._targets.remove('', target.url, function(err) {
-          if(err) {
-            return cb(err);
-          }
-
-          return cb();
-        });
-      }, function(err, results) {
+      self._targets.remove('', target.url, function(err) {
         if(err) {
           return cb(err);
         }
 
         return cb();
       });
+    }, function(err, results) {
+      if(err) {
+        return cb(err);
+      }
+
+      return cb();
     });
   });
 };
