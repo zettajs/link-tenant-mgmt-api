@@ -167,20 +167,15 @@ Tenants.prototype.remove = function(tenantId, cb) {
 Tenants.prototype._freeTenantDirectory = function(tenantId, cb) {
   var self = this;
 
-  this._router.get(tenantId, function(err) {
-    if(!err) {
-      self._router.removeTenantDirectory(tenantId, function(err) {
-        if(err) {
-          return cb(err);
-        }
-        
-        cb();
-
-      });
-    } else {
-      cb();
+  self._router.removeTenantDirectory(tenantId, function(err) {
+    if(err) {
+      return cb(err);
     }
+      
+    cb();
+
   });
+    
 }
 
 Tenants.prototype._freeTargets = function(tenantId, cb) {
