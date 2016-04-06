@@ -190,7 +190,8 @@ Tenants.prototype._freeTargets = function(tenantId, cb) {
         return cb();
       } 
 
-      self._targets.remove('', target.url, function(err) {
+
+      self._targets.restart(target.url, function(err) {
         if(err) {
           return cb(err);
         }
