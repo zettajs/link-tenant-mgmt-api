@@ -142,7 +142,7 @@ ServiceRegistry.prototype.restart = function(serverUrl, cb) {
   var parsedServerUrl = url.parse(serverUrl);
 
   var opts = {
-    host: parsedServerUrl.host,
+    hostname: parsedServerUrl.hostname,
     port: parsedServerUrl.port,
     path: '/restart'
   };
@@ -160,6 +160,7 @@ ServiceRegistry.prototype.restart = function(serverUrl, cb) {
     cb(err);
   });
 
+  req.end();
 }
 
 ServiceRegistry.prototype._buildServer = function(data) {

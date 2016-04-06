@@ -15,6 +15,24 @@ module.exports = function(contex) {
         method: 'DELETE',
         href: env.helpers.url.current(),
         type: 'application/x-www-form-urlencoded'
+      },
+      {
+        name: 'scale-up',
+        method: 'POST',
+        href: env.helpers.url.path('scale-up'),
+        type: 'application/x-www-form-urlencoded',
+        fields: [
+          {'name': 'size', 'type': 'number'}  
+        ]
+      },
+      {
+        name: 'scale-down',
+        method: 'POST',
+        href: env.helpers.url.path('scale-up'),
+        type: 'application/x-www-form-urlencoded',
+        fields: [
+          {'name': 'size', 'type': 'number'}  
+        ]
       }  
     ],
     links: [

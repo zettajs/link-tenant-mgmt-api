@@ -1,6 +1,7 @@
 var path = require('path');
 var cache = require('memory-cache');
 var async = require('async');
+var qs = require('querystring');
 
 var Tenants = module.exports = function(tenantsClient) {
   this._tenants = tenantsClient;
@@ -15,7 +16,9 @@ Tenants.prototype.init = function(config) {
     .consumes('application/json')
     .get('/', this.list)
     .get('/{id}', this.show)
-    .del('/{id}', this.del);
+    .del('/{id}', this.del)
+    .put('/{id}/scale-up', this.scaleUp)
+    .put('/{id}/scale-down', this.scaleDown);
 };
 
 Tenants.prototype.list = function(env, next) {
@@ -92,6 +95,42 @@ Tenants.prototype._evictTenant = function(tenantId, cb) {
 
     cb();
   });
+};
+
+Tenants.prototype.scaleUp = function(env, next) {
+  var self = this;
+  var tenantId = env.route.params.id;
+  env.request.getBody(function(err, body) {
+    var fields = qs.parse(body.toString());
+    var size = parseInt(fields.size);
+    self._tenants._targets.findAll(function(err, results) {
+      var unallocated = results.filter(function(item) { return !item.tenantId; });
+      if(size > unallocated.length) {
+        env.response.statusCode = 400;
+        next(env);
+      }
+
+      var records = [];
+      for(var i = 0; i < size; i++) {
+        var target = unallocated[i];
+        var newTarget = {
+          url: target.url,
+          tenantId: tenantId,
+          created: target.created,
+          version: target.version      
+        }
+
+        records.push({ newRecord: newTarget, oldRecord: target}); 
+      }
+
+      
+    });
+  });
+};
+
+Tenants.prototype.scaleDown = function(env, next) {
+  var self = this;
+  var tenantId = env.route.params.id;
 };
 
 Tenants.prototype.del = function(env, next) {

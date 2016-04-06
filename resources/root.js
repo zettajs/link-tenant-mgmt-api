@@ -20,12 +20,23 @@ Root.prototype.list = function(env, next) {
       return next(env);
     }
     
-    env.targets = {};
-    env.targets.total = Math.floor(results.length / 2);
+    env.tenants = {};
+    env.tenants.total = Math.floor(results.length / 2);
     var allocated = results.filter(function(item) { return item.tenantId;  });
+    var tenantIds = [];
+    allocated.forEach(function(tenant) {
+      if(tenantIds.indexOf(tenant.tenantId) == -1) {
+        tenantIds.push(tenant.tenantId);
+      }
+    });
     var unallocated = results.filter(function(item) { return !item.tenantId; });
-    env.targets.allocated = Math.floor(allocated.length / self.defaultTargetsPerTenant);
-    env.targets.unallocated = Math.floor(unallocated.length / self.defaultTargetsPerTenant);
+    env.tenants.allocated = tenantIds.length;
+    env.tenants.unallocated = Math.floor(unallocated.length / self.defaultTargetsPerTenant);
+
+    env.targets = {};
+    env.targets.total = results.length;
+    env.targets.allocated = allocated.length;
+    env.targets.unallocated = unallocated.length;
     env.format.render('root', { env: env });
     next(env);
   });
