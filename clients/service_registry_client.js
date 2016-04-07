@@ -144,7 +144,8 @@ ServiceRegistry.prototype.restart = function(serverUrl, cb) {
   var opts = {
     hostname: parsedServerUrl.hostname,
     port: parsedServerUrl.port,
-    path: '/restart'
+    path: '/restart',
+    method: 'DELETE'
   };
 
 
