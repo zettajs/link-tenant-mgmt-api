@@ -13,22 +13,21 @@ module.exports = function(contex) {
       {
         name: 'evict-tenant',
         method: 'DELETE',
-        href: env.helpers.url.current(),
-        type: 'application/x-www-form-urlencoded'
+        href: env.helpers.url.current()
       },
       {
         name: 'scale-up',
         method: 'POST',
-        href: env.helpers.url.path('scale-up'),
-        type: 'application/x-www-form-urlencoded',
-        fields: [
+        href: env.helpers.url.join('scale-up'),
+        type: 'application/json',
+        fields: [ 
           {'name': 'size', 'type': 'number'}  
         ]
       },
       {
         name: 'scale-down',
         method: 'POST',
-        href: env.helpers.url.path('scale-up'),
+        href: env.helpers.url.join('scale-down'),
         type: 'application/x-www-form-urlencoded',
         fields: [
           {'name': 'size', 'type': 'number'}  

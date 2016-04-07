@@ -185,25 +185,45 @@ Tenants.prototype._freeTargets = function(tenantId, cb) {
       return cb(err);
     }
 
-    async.map(results, function(target, cb) {
-      if(!target.tenantId || target.tenantId != tenantId) {
-        return cb();
-      } 
-
-
-      self._targets.restart(target.url, function(err) {
-        if(err) {
-          return cb(err);
-        }
-
-        return cb();
-      });
-    }, function(err, results) {
+    var targets = results.filter(function(item) { return item.tenantId && item.tenantId == tenantId; });
+    self._freeTargetsInArray(targets, function(err) {
       if(err) {
         return cb(err);
       }
 
       return cb();
     });
+    
+  });
+};
+
+Tenants.prototype._freeTargetsInArray = function(targets, cb) {
+  var self = this;
+  async.map(targets, function(target, cb) {
+
+    self._targets.restart(target.url, function(err) {
+      if(err) {
+        return cb(err);
+      }
+
+      return cb();
+    });
+  }, function(err, results) {
+    if(err) {
+      return cb(err);
+    }
+
+    return cb();
+  });
+}
+
+Tenants.prototype.allocate = function(oldRecord, newRecord, cb) {
+  var self = this;
+  self._targets.allocate('cloud-target', oldRecord, newRecord, function(err) {
+    if(err) {
+      return cb(err);
+    }
+
+    return cb();
   });
 };
