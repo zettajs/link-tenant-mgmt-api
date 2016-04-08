@@ -106,7 +106,7 @@ Tenants.prototype.scaleUp = function(env, next) {
       var unallocated = results.filter(function(item) { return !item.tenantId; });
       if(size > unallocated.length) {
         env.response.statusCode = 400;
-        next(env);
+        return next(env);
       }
 
       var records = [];
