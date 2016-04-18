@@ -2,10 +2,12 @@ var http = require('http');
 var async = require('async');
 var RouterClient = require('./router_client');
 var TargetClient = require('./service_registry_client');
+var VersionClient = require('./version_client');
 
 var Tenants = module.exports = function(opts) {
   this._router = new RouterClient(opts);
   this._targets = new TargetClient(opts);
+  this._version = new VersionClient(opts);
 
   this.parallelLimit = 10;
 };

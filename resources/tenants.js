@@ -103,42 +103,52 @@ Tenants.prototype.scaleUp = function(env, next) {
     var fields = JSON.parse(body.toString());
     var size = parseInt(fields.size);
     self._tenants._targets.findAll(function(err, results) {
-      var unallocated = results.filter(function(item) { return !item.tenantId; });
-      if(size > unallocated.length) {
-        env.response.statusCode = 400;
-        return next(env);
-      }
-
-      var records = [];
-      for(var i = 0; i < size; i++) {
-        var target = unallocated[i];
-        var newTarget = {
-          url: target.url,
-          tenantId: tenantId,
-          created: target.created,
-          version: target.version      
-        }
-
-        records.push({ newRecord: newTarget, oldRecord: target}); 
-      }
-
-      async.each(records, function(record, cb) {
-        self._tenants.allocate(record.oldRecord, record.newRecord, function(err) {
-          if(err) {
-            return cb(err);
-          }
-
-          return cb();
-        });  
-      }, function(err) {
+      self._tenants._version.get(function(err, version) {
         if(err) {
           env.response.statusCode = 500;
           return next(env);
+        } 
+        var currentTargets = results.filter(function(item) { return item.version == version.version; });
+
+        var unallocated = currentTargets.filter(function(item) { return !item.tenantId; });
+        if(size > unallocated.length) {
+          env.response.statusCode = 400;
+          return next(env);
         }
 
-        env.response.statusCode = 204;
-        return next(env);
-      });     
+        var records = [];
+        for(var i = 0; i < size; i++) {
+          var target = unallocated[i];
+          var newTarget = {
+            url: target.url,
+            tenantId: tenantId,
+            created: target.created,
+            version: target.version      
+          }
+
+          records.push({ newRecord: newTarget, oldRecord: target}); 
+        }
+
+        async.each(records, function(record, cb) {
+          self._tenants.allocate(record.oldRecord, record.newRecord, function(err) {
+            if(err) {
+              return cb(err);
+            }
+
+            return cb();
+          });  
+        }, function(err) {
+          if(err) {
+            env.response.statusCode = 500;
+            return next(env);
+          }
+
+          env.response.statusCode = 204;
+          return next(env);
+        });
+
+      }); 
+           
     });
   });
 };

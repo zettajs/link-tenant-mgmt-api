@@ -17,7 +17,7 @@ module.exports = function(contex) {
       },
       {
         name: 'scale-up',
-        method: 'POST',
+        method: 'PUT',
         href: env.helpers.url.join('scale-up'),
         type: 'application/json',
         fields: [ 
@@ -26,7 +26,7 @@ module.exports = function(contex) {
       },
       {
         name: 'scale-down',
-        method: 'POST',
+        method: 'PUT',
         href: env.helpers.url.join('scale-down'),
         type: 'application/x-www-form-urlencoded',
         fields: [
