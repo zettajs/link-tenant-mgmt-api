@@ -22,6 +22,6 @@ titan()
   .compress()
   .logger()
   .format({ engines: [siren], override: { 'application/json': siren } })
-  .add(RootResource)
+  .add(RootResource, tenantClient)
   .add(TenantsResource, tenantClient)
   .listen(PORT);

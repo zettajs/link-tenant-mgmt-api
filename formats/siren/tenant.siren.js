@@ -9,6 +9,31 @@ module.exports = function(contex) {
       totalPeers: tenant.peers.length,
       tenants: []
     },
+    actions: [
+      {
+        name: 'evict-tenant',
+        method: 'DELETE',
+        href: env.helpers.url.current()
+      },
+      {
+        name: 'scale-up',
+        method: 'PUT',
+        href: env.helpers.url.join('scale-up'),
+        type: 'application/json',
+        fields: [ 
+          {'name': 'size', 'type': 'number'}  
+        ]
+      },
+      {
+        name: 'scale-down',
+        method: 'PUT',
+        href: env.helpers.url.join('scale-down'),
+        type: 'application/x-www-form-urlencoded',
+        fields: [
+          {'name': 'size', 'type': 'number'}  
+        ]
+      }  
+    ],
     links: [
       { rel: ['collection'], href: env.helpers.url.path('/tenants') },
       { rel: ['self'], href: env.helpers.url.current() }

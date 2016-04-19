@@ -2,10 +2,12 @@ var http = require('http');
 var async = require('async');
 var RouterClient = require('./router_client');
 var TargetClient = require('./service_registry_client');
+var VersionClient = require('./version_client');
 
 var Tenants = module.exports = function(opts) {
   this._router = new RouterClient(opts);
   this._targets = new TargetClient(opts);
+  this._version = new VersionClient(opts);
 
   this.parallelLimit = 10;
 };
@@ -134,4 +136,96 @@ Tenants.prototype._processTenantsList = function(results, cb) {
   });
 
   return cb(null, allTenants);
+};
+
+Tenants.prototype.remove = function(tenantId, cb) {
+  var self = this;
+  async.parallel({
+    router: function(cb) {
+      self._freeTenantDirectory(tenantId, function(err) {
+        if(err) {
+          return cb(err);
+        }
+
+        cb();
+      })        
+    },
+    targets: function(cb) {
+      self._freeTargets(tenantId, function(err) {
+        if(err) {
+          return cb(err);
+        } 
+
+        cb();
+      });  
+    }
+  }, function(err, results) {
+    if(err) {
+      return cb(err);
+    }  
+  }); 
+};
+
+Tenants.prototype._freeTenantDirectory = function(tenantId, cb) {
+  var self = this;
+
+  self._router.removeTenantDirectory(tenantId, function(err) {
+    if(err) {
+      return cb(err);
+    }
+      
+    cb();
+
+  });
+    
+}
+
+Tenants.prototype._freeTargets = function(tenantId, cb) {
+  var self = this;
+  self._targets.findAll(function(err, results) {
+    if(err) {
+      return cb(err);
+    }
+
+    var targets = results.filter(function(item) { return item.tenantId && item.tenantId == tenantId; });
+    self._freeTargetsInArray(targets, function(err) {
+      if(err) {
+        return cb(err);
+      }
+
+      return cb();
+    });
+    
+  });
+};
+
+Tenants.prototype._freeTargetsInArray = function(targets, cb) {
+  var self = this;
+  async.map(targets, function(target, cb) {
+
+    self._targets.restart(target.url, function(err) {
+      if(err) {
+        return cb(err);
+      }
+
+      return cb();
+    });
+  }, function(err, results) {
+    if(err) {
+      return cb(err);
+    }
+
+    return cb();
+  });
+}
+
+Tenants.prototype.allocate = function(oldRecord, newRecord, cb) {
+  var self = this;
+  self._targets.allocate('cloud-target', oldRecord, newRecord, function(err) {
+    if(err) {
+      return cb(err);
+    }
+
+    return cb();
+  });
 };

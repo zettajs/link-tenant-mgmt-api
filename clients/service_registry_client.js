@@ -2,6 +2,7 @@ var Etcd = require('node-etcd');
 var url = require('url');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
+var http = require('http');
 
 var ServiceRegistry = module.exports = function(options) {
   EventEmitter.call(this);
@@ -136,6 +137,32 @@ ServiceRegistry.prototype.remove = function(type, serverUrl, cb) {
     }
   });
 };
+
+ServiceRegistry.prototype.restart = function(serverUrl, cb) {
+  var parsedServerUrl = url.parse(serverUrl);
+
+  var opts = {
+    hostname: parsedServerUrl.hostname,
+    port: parsedServerUrl.port,
+    path: '/restart',
+    method: 'DELETE'
+  };
+
+
+  var req = http.request(opts, function(response) {
+    if(response.statusCode !== 204) {
+      return cb(new Error('Non sucessful status code: ' + response.statusCode));
+    }
+
+    return cb();
+  });
+
+  req.on('error', function(err) {
+    cb(err);
+  });
+
+  req.end();
+}
 
 ServiceRegistry.prototype._buildServer = function(data) {
   data = JSON.parse(data.value);
