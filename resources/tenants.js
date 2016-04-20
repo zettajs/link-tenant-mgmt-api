@@ -213,6 +213,12 @@ Tenants.prototype.scaleDown = function(env, next) {
         peerCounts.push({url: targetUrl, count: results.targetsWithPeers[targetUrl]});
       });
 
+      var scaleDownResult = peerCounts.length - size;
+
+      if(scaleDownResult < 2) {
+        env.response.statusCode = 400;
+        return next(env);
+      }
       var sortedCounts = peerCounts.sort(function(a, b) {
         if(a.count > b.count) {
           return 1;
