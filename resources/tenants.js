@@ -78,11 +78,7 @@ Tenants.prototype._peersWithCache = function(tenantId, cb) {
   }
 };
 
-Tenants.prototype._evictTenant = function(tenantId, cb) {
-  var key = 'peers/' + tenantId;
-  cache.del(key);
-    
-};
+
 
 Tenants.prototype._evictTenant = function(tenantId, cb) {
   var key = 'peers/' + tenantId;
