@@ -105,15 +105,22 @@ Tenants.prototype.scaleUp = function(env, next) {
           return next(env);
         } 
         var currentTargets = results.filter(function(item) { return item.version == version.version; });
+        var targetsAllocatedToTenant = currentTargets.filter(function(item) { return item.tenantId && item.tenantId == tenantId; });
+        var scaleFactor = size - targetsAllocatedToTenant.length;
 
         var unallocated = currentTargets.filter(function(item) { return !item.tenantId; });
-        if(size > unallocated.length) {
+        if(scaleFactor > unallocated.length) {
+          env.response.statusCode = 400;
+          return next(env);
+        }
+
+        if(scaleFactor < 0) {
           env.response.statusCode = 400;
           return next(env);
         }
 
         var records = [];
-        for(var i = 0; i < size; i++) {
+        for(var i = 0; i < scaleFactor; i++) {
           var target = unallocated[i];
           var newTarget = {
             url: target.url,
@@ -211,10 +218,16 @@ Tenants.prototype.scaleDown = function(env, next) {
 
       var scaleDownResult = peerCounts.length - size;
 
-      if(scaleDownResult < 2) {
+      if(size < 2) {
         env.response.statusCode = 400;
         return next(env);
       }
+
+      if(scaleDownResult < 0) {
+        env.response.statusCode = 400;
+        return next(env);
+      }
+
       var sortedCounts = peerCounts.sort(function(a, b) {
         if(a.count > b.count) {
           return 1;
@@ -227,7 +240,7 @@ Tenants.prototype.scaleDown = function(env, next) {
         return 0;
       });
 
-      var targetsToRestart = sortedCounts.splice(0, size);
+      var targetsToRestart = sortedCounts.splice(0, scaleDownResult);
       self._tenants._freeTargetsInArray(targetsToRestart, function(err) {
         if(err) {
           env.response.statusCode = 500;
