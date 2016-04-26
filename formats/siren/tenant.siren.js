@@ -16,23 +16,14 @@ module.exports = function(contex) {
         href: env.helpers.url.current()
       },
       {
-        name: 'scale-up',
+        name: 'scale',
         method: 'PUT',
-        href: env.helpers.url.join('scale-up'),
+        href: env.helpers.url.join('scale'),
         type: 'application/json',
         fields: [ 
           {'name': 'size', 'type': 'number'}  
         ]
-      },
-      {
-        name: 'scale-down',
-        method: 'PUT',
-        href: env.helpers.url.join('scale-down'),
-        type: 'application/json',
-        fields: [
-          {'name': 'size', 'type': 'number'}  
-        ]
-      }  
+      } 
     ],
     links: [
       { rel: ['collection'], href: env.helpers.url.path('/tenants') },

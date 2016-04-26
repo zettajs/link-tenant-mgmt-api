@@ -16,8 +16,7 @@ Tenants.prototype.init = function(config) {
     .get('/', this.list)
     .get('/{id}', this.show)
     .del('/{id}', this.del)
-    .put('/{id}/scale-up', this.scaleUp)
-    .put('/{id}/scale-down', this.scaleDown);
+    .put('/{id}/scale', this.scale)
 };
 
 Tenants.prototype.list = function(env, next) {
@@ -92,168 +91,202 @@ Tenants.prototype._evictTenant = function(tenantId, cb) {
   });
 };
 
-Tenants.prototype.scaleUp = function(env, next) {
-  var self = this;
-  var tenantId = env.route.params.id;
-  env.request.getBody(function(err, body) {
-    var fields = JSON.parse(body.toString());
-    var size = parseInt(fields.size);
-    self._tenants._targets.findAll(function(err, results) {
-      self._tenants._version.get(function(err, version) {
-        if(err) {
-          env.response.statusCode = 500;
-          return next(env);
-        } 
-        var currentTargets = results.filter(function(item) { return item.version == version.version; });
-        var targetsAllocatedToTenant = currentTargets.filter(function(item) { return item.tenantId && item.tenantId == tenantId; });
-        var scaleFactor = size - targetsAllocatedToTenant.length;
-
-        var unallocated = currentTargets.filter(function(item) { return !item.tenantId; });
-        if(scaleFactor > unallocated.length) {
-          env.response.statusCode = 400;
-          return next(env);
-        }
-
-        if(scaleFactor < 0) {
-          env.response.statusCode = 400;
-          return next(env);
-        }
-
-        var records = [];
-        for(var i = 0; i < scaleFactor; i++) {
-          var target = unallocated[i];
-          var newTarget = {
-            url: target.url,
-            tenantId: tenantId,
-            created: target.created,
-            version: target.version      
-          }
-
-          records.push({ newRecord: newTarget, oldRecord: target}); 
-        }
-
-        async.each(records, function(record, cb) {
-          self._tenants.allocate(record.oldRecord, record.newRecord, function(err) {
-            if(err) {
-              return cb(err);
-            }
-
-            return cb();
-          });  
-        }, function(err) {
-          if(err) {
-            env.response.statusCode = 500;
-            return next(env);
-          }
-
-          env.response.statusCode = 204;
-          return next(env);
-        });
-
-      }); 
-           
-    });
-  });
-};
-
-Tenants.prototype.scaleDown = function(env, next) {
+Tenants.prototype.scale = function(env, next) {
   var self = this;
   var tenantId = env.route.params.id;
   env.request.getBody(function(err, body) {
     var fields = JSON.parse(body.toString());
     var size = parseInt(fields.size);
     
-    async.parallel({
-      targetsWithPeers: function(callback) {
-        var peersCount = {};
-        self._tenants.peers(tenantId, function(err, peers) {
-          if(err) {
-            return callback(err);
-          }
-          
-          peers.forEach(function(peer) {
-            if(peersCount[peer.url]) {
-              peersCount[peer.url]++;
-            } else {
-              peersCount[peer.url] = 1;
+    self._tenants._targets.findAll(function(err, results) {
+      self._tenants._version.get(function(err, version) {
+        var currentTargets = results.filter(function(item) { return item.version == version.version; });
+        var targetsAllocatedToTenant = currentTargets.filter(function(item) { return item.tenantId && item.tenantId == tenantId; });
+        console.log('Attempting to scale from ', size, ' to ', targetsAllocatedToTenant.length); 
+        if(targetsAllocatedToTenant.length > size) {
+          self._scaleDown(tenantId, size, function(err) {
+            if(err) {
+              env.response.statusCode = 500;
+              return next(env);
             }
+
+            env.response.statusCode = 204;
+            return next(env);
+          }); 
+        } else if(targetsAllocatedToTenant.length < size) {
+          self._scaleUp(tenantId, size, function(err) {
+            if(err) {
+              env.response.statusCode = 500;
+              return next(env);
+            }
+
+            env.response.statusCode = 204;
+            return next(env);
+
           });
-          
+        } else {
+          env.response.statusCode = 202;
+          return next(env); 
+        }
 
-          return callback(null, peersCount);
-        });                    
-      },
-      allTargetsAllocated: function(callback) {
-        self._tenants._targets.findAll(function(err, results) {
-          if(err) {
-            return callback(err);
-          }
-          var targets = results.filter(function(item) { return item.tenantId && item.tenantId == tenantId; }); 
-          var targetUrls = targets.map(function(item) { return item.url; });
-          return callback(null, targetUrls);
-        });                     
-      }
-    },
-    function(err, results) {
+      });
+    });
+  });
+};
+
+Tenants.prototype._scaleUp = function(tenantId, size, callback) {
+  var self = this;
+  self._tenants._targets.findAll(function(err, results) {
+    if(err) {
+      return callback(err);
+    }
+    self._tenants._version.get(function(err, version) {
       if(err) {
-        env.response.statusCode = 500;
-        return next(env); 
+        return callback(err);
       } 
+      var currentTargets = results.filter(function(item) { return item.version == version.version; });
+      var targetsAllocatedToTenant = currentTargets.filter(function(item) { return item.tenantId && item.tenantId == tenantId; });
+      var scaleFactor = size - targetsAllocatedToTenant.length;
 
-      //scaling down strategy. 
-      //Sort by nodes by least amount of peers attached.
-      //Decomission amount of nodes.
-      var targetsWithPeers = Object.keys(results.targetsWithPeers);
-      var allTargetsAllocated = results.allTargetsAllocated;
-      var peerCounts = [];
-      allTargetsAllocated.forEach(function(targetUrl) {
-        if(targetsWithPeers.indexOf(targetUrl) == -1) {
-          peerCounts.push({url: targetUrl, count: 0});
-        }
-      });
-
-      targetsWithPeers.forEach(function(targetUrl) {
-        peerCounts.push({url: targetUrl, count: results.targetsWithPeers[targetUrl]});
-      });
-
-      var scaleDownResult = peerCounts.length - size;
-
-      if(size < 2) {
-        env.response.statusCode = 400;
-        return next(env);
+      var unallocated = currentTargets.filter(function(item) { return !item.tenantId; });
+      if(scaleFactor > unallocated.length) {
+        return callback(new Error('Not enough targets for scaling.'));
       }
 
-      if(scaleDownResult < 0) {
-        env.response.statusCode = 400;
-        return next(env);
+      var records = [];
+      for(var i = 0; i < scaleFactor; i++) {
+        var target = unallocated[i];
+        var newTarget = {
+          url: target.url,
+          tenantId: tenantId,
+          created: target.created,
+          version: target.version      
+        }
+
+        records.push({ newRecord: newTarget, oldRecord: target}); 
       }
 
-      var sortedCounts = peerCounts.sort(function(a, b) {
-        if(a.count > b.count) {
-          return 1;
-        }
+      async.each(records, function(record, cb) {
+        self._tenants.allocate(record.oldRecord, record.newRecord, function(err) {
+          if(err) {
+            return cb(err);
+          }
 
-        if(a.count < b.count) {
-          return -1;
-        }
-
-        return 0;
-      });
-
-      var targetsToRestart = sortedCounts.splice(0, scaleDownResult);
-      self._tenants._freeTargetsInArray(targetsToRestart, function(err) {
+          return cb();
+        });  
+      }, function(err) {
         if(err) {
+          return callback(err);
+        }
+
+        callback();
+        /*if(err) {
           env.response.statusCode = 500;
           return next(env);
         }
 
         env.response.statusCode = 204;
-        return next(env);
-      }); 
-    });
-    
+        return next(env);*/
+      });
+    }); 
   });
-  
+};
+
+Tenants.prototype._scaleDown = function(tenantId, size, callback) {
+  var self = this;
+  async.parallel({
+    targetsWithPeers: function(callback) {
+      var peersCount = {};
+      self._tenants.peers(tenantId, function(err, peers) {
+        if(err) {
+          return callback(err);
+        }
+        
+        peers.forEach(function(peer) {
+          if(peersCount[peer.url]) {
+            peersCount[peer.url]++;
+          } else {
+            peersCount[peer.url] = 1;
+          }
+        });
+        
+
+        return callback(null, peersCount);
+      });                    
+    },
+    allTargetsAllocated: function(callback) {
+      self._tenants._targets.findAll(function(err, results) {
+        if(err) {
+          return callback(err);
+        }
+        var targets = results.filter(function(item) { return item.tenantId && item.tenantId == tenantId; }); 
+        var targetUrls = targets.map(function(item) { return item.url; });
+        return callback(null, targetUrls);
+      });                     
+    }
+  },
+  function(err, results) {
+    if(err) {
+      return callback(err); 
+    } 
+
+    //scaling down strategy. 
+    //Sort by nodes by least amount of peers attached.
+    //Decomission amount of nodes.
+    var targetsWithPeers = Object.keys(results.targetsWithPeers);
+    var allTargetsAllocated = results.allTargetsAllocated;
+    var peerCounts = [];
+    allTargetsAllocated.forEach(function(targetUrl) {
+      if(targetsWithPeers.indexOf(targetUrl) == -1) {
+        peerCounts.push({url: targetUrl, count: 0});
+      }
+    });
+
+    targetsWithPeers.forEach(function(targetUrl) {
+      peerCounts.push({url: targetUrl, count: results.targetsWithPeers[targetUrl]});
+    });
+
+    var scaleDownResult = peerCounts.length - size;
+
+    if(size < 2) {
+      return callback(new Error('Size less than default amount'));
+    }
+
+    if(scaleDownResult < 0) {
+      return callback(new Error('Scale down result negative.'));
+    }
+
+    var sortedCounts = peerCounts.sort(function(a, b) {
+      if(a.count > b.count) {
+        return 1;
+      }
+
+      if(a.count < b.count) {
+        return -1;
+      }
+
+      return 0;
+    });
+
+    var targetsToRestart = sortedCounts.splice(0, scaleDownResult);
+    self._tenants._freeTargetsInArray(targetsToRestart, function(err) {
+      if(err) {
+        return callback(err);
+      }
+
+      callback();
+
+      /*
+      if(err) {
+        env.response.statusCode = 500;
+        return next(env);
+      }
+
+      env.response.statusCode = 204;
+      return next(env);
+      */
+    }); 
+  });
 };
 
 Tenants.prototype.del = function(env, next) {
