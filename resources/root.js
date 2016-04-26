@@ -21,7 +21,6 @@ Root.prototype.list = function(env, next) {
     }
     
     env.tenants = {};
-    env.tenants.total = Math.floor(results.length / 2);
     var allocated = results.filter(function(item) { return item.tenantId;  });
     var tenantIds = [];
     allocated.forEach(function(tenant) {
@@ -31,7 +30,9 @@ Root.prototype.list = function(env, next) {
     });
     var unallocated = results.filter(function(item) { return !item.tenantId; });
     env.tenants.allocated = tenantIds.length;
-    env.tenants.unallocated = Math.floor(unallocated.length / self.defaultTargetsPerTenant);
+    env.tenants.unallocated = Math.ceil(unallocated.length / self.defaultTargetsPerTenant);
+    env.tenants.total = tenantIds.length + env.tenants.unallocated;
+
 
     env.targets = {};
     env.targets.total = results.length;

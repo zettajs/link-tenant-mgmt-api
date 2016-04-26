@@ -5,7 +5,7 @@ module.exports = function(model) {
   var entity = {
     class: ['root'],
     properties: {
-      targetsPerTenant: 2,
+      minTargetsPerTenant: 2,
       tenants: {
         total: env.tenants.total,
         unallocated: env.tenants.unallocated,

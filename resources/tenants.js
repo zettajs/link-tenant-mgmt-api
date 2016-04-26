@@ -44,16 +44,34 @@ Tenants.prototype.show = function(env, next) {
       env.response.statusCode = 404;
       return next(env);
     }
-
-    self._peersWithCache(tenantId, function(err, peers) {
+    self._tenants._targets.findAll(function(err, results) {
       if (err) {
-        env.response.statusCode = 501;
+        env.response.statusCode = 500;
         return next(env);
       }
       
-      tenant.peers = peers;
-      env.format.render('tenant', { env: env, tenant: tenant });
-      next(env);
+      self._tenants._version.get(function(err, version) {
+
+        if (err) {
+          env.response.statusCode = 500;
+          return next(env);
+        }
+
+        var currentTargets = results.filter(function(item) { return item.version == version.version; });
+        var targetsAllocatedToTenant = currentTargets.filter(function(item) { return item.tenantId && item.tenantId == tenantId; });
+
+        self._peersWithCache(tenantId, function(err, peers) {
+          if (err) {
+            env.response.statusCode = 501;
+            return next(env);
+          }
+          
+          tenant.peers = peers;
+          tenant.targets = targetsAllocatedToTenant.length;
+          env.format.render('tenant', { env: env, tenant: tenant });
+          next(env);
+        });
+      });
     });
   });
 };
