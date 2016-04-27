@@ -20,7 +20,7 @@ module.exports = function(contex) {
         name: 'scale',
         method: 'PUT',
         href: env.helpers.url.join('scale'),
-        type: 'application/json',
+        type: 'application/x-www-form-urlencoded',
         fields: [ 
           {'name': 'size', 'type': 'number'}  
         ]

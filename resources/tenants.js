@@ -1,6 +1,7 @@
 var path = require('path');
 var cache = require('memory-cache');
 var async = require('async');
+var querystring = require('querystring');
 
 var Tenants = module.exports = function(tenantsClient) {
   this._tenants = tenantsClient;
@@ -12,7 +13,7 @@ Tenants.prototype.init = function(config) {
     .path('/tenants')
     .produces('application/json')
     .produces('application/vnd.siren+json')
-    .consumes('application/json')
+    .consumes('application/x-www-form-urlencoded')
     .get('/', this.list)
     .get('/{id}', this.show)
     .del('/{id}', this.del)
@@ -113,7 +114,7 @@ Tenants.prototype.scale = function(env, next) {
   var self = this;
   var tenantId = env.route.params.id;
   env.request.getBody(function(err, body) {
-    var fields = JSON.parse(body.toString());
+    var fields = querystring.parse(body.toString());
     var size = parseInt(fields.size);
     
     self._tenants._targets.findAll(function(err, results) {
