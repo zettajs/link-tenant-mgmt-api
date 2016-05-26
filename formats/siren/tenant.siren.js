@@ -24,7 +24,12 @@ module.exports = function(contex) {
         fields: [ 
           {'name': 'size', 'type': 'number'}  
         ]
-      } 
+      },
+      {
+        name: 'target',
+        method: 'POST',
+        href: env.helpers.url.join('target')
+      }
     ],
     links: [
       { rel: ['collection'], href: env.helpers.url.path('/tenants') },

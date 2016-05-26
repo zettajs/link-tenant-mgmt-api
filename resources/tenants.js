@@ -2,9 +2,14 @@ var path = require('path');
 var cache = require('memory-cache');
 var async = require('async');
 var querystring = require('querystring');
+var TargetAllocation = require('../target_allocation')
 
-var Tenants = module.exports = function(tenantsClient) {
+var Tenants = module.exports = function(tenantsClient,
+                                        serviceRegistryClient,
+                                        versionClient,
+                                        targetMonitor) {
   this._tenants = tenantsClient;
+  this._targetAllocation = new TargetAllocation(serviceRegistryClient, versionClient, targetMonitor);
   this.peersCacheTimeout = 10000;
 };
 
@@ -18,6 +23,7 @@ Tenants.prototype.init = function(config) {
     .get('/{id}', this.show)
     .del('/{id}', this.del)
     .put('/{id}/scale', this.scale)
+    .post('/{id}/target', this.allocateTarget);
 };
 
 Tenants.prototype.list = function(env, next) {
@@ -347,3 +353,22 @@ Tenants.prototype.del = function(env, next) {
   });
 
 }
+
+Tenants.prototype.allocateTarget = function(env, next) {
+  var tenantId = env.route.params.id;
+  console.log('tenantId:', tenantId);
+
+
+  this._targetAllocation.lookup(tenantId, function(err, serverUrl) {
+    if (err) {
+      env.response.statusCode = 503;
+      return next(env);
+    }
+
+
+    env.response.statusCode = 302;
+    env.response.setHeader('Location', serverUrl)
+    env.format.render('target', { env: env, serverUrl: serverUrl, tenantId: tenantId });
+    return next(env);
+  });
+};
