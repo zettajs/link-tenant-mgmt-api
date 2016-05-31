@@ -356,19 +356,14 @@ Tenants.prototype.del = function(env, next) {
 
 Tenants.prototype.allocateTarget = function(env, next) {
   var tenantId = env.route.params.id;
-  console.log('tenantId:', tenantId);
-
-
   this._targetAllocation.lookup(tenantId, function(err, serverUrl) {
     if (err) {
       env.response.statusCode = 503;
       return next(env);
     }
 
-
     env.response.statusCode = 302;
     env.response.setHeader('Location', serverUrl)
-    env.format.render('target', { env: env, serverUrl: serverUrl, tenantId: tenantId });
     return next(env);
   });
 };
