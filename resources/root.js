@@ -39,6 +39,8 @@ Root.prototype.list = function(env, next) {
     env.targets.allocated = allocated.length;
     env.targets.unallocated = unallocated.length;
     env.format.render('root', { env: env });
+
+    console.log('Server root...', env.helpers)
     next(env);
   });
 };
