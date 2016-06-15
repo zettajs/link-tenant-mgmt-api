@@ -28,8 +28,6 @@ var tenantsClient = new TenantsClient(serviceRegistryClient, versionClient, rout
 
 var PORT = process.env.PORT || 2000;
 
-console.log('Starting tenant management api on ' + PORT);
-
 titan()
   .allow('*')
   .compress()
