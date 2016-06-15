@@ -1,5 +1,6 @@
 # Link Tenant Management API
 
+
 Currently a readonly API for accessing tenant information. Returns list of tenants, peers and devices connected to tenant. Peers and devices are cached to for 10 and 60 seconds, respectively.
 
 ## API Response
