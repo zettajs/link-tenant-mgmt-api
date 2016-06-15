@@ -1,5 +1,6 @@
 var http = require('http');
 var url = require('url');
+var jwt = require('jsonwebtoken');
 
 function once(cb) {
   var called = false;
@@ -22,6 +23,17 @@ module.exports = function(opts, target, callback) {
     port: parsed.port,
     path: '/'
   };
+
+  if (opts.jwtPlaintextKeys) {
+    var token = { location: target.url };
+    var cipher = jwt.sign(token, opts.jwtPlaintextKeys.internal, { expiresIn: 60 });
+
+    if (!options.headers) {
+      options.headers = {};
+    }
+    
+    options.headers['x-apigee-iot-jwt'] = cipher;
+  }
 
   var req = http.request(options, function(res) {
     clearTimeout(timer);

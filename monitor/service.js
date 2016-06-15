@@ -36,6 +36,10 @@ var MonitorService = module.exports = function(serviceRegistryClient, opts) {
 
   this.state = {}; // { <targetUrl>: TargetState }
   this.disabled = (opts.disabled === true);
+  
+  // JWT Keys
+  this.jwtPlaintextKeys = opts.jwtPlaintextKeys;
+  
   // If disabled don't do anything
   if (this.disabled) {
     return;
@@ -116,7 +120,8 @@ MonitorService.prototype._updateHost = function(target, callback) {
 
   var state = this.state[target.url];
   var opts = {
-    Timeout: this.Timeout
+    Timeout: this.Timeout,
+    jwtPlaintextKeys: this.jwtPlaintextKeys
   };
 
   targetCheck(opts, target, function(result, err) {

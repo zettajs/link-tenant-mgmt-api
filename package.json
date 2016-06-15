@@ -12,6 +12,8 @@
   "dependencies": {
     "argo-formatter-siren": "0.0.0",
     "async": "^1.4.2",
+    "aws-sdk": "^2.4.0",
+    "jsonwebtoken": "^7.0.1",
     "memory-cache": "^0.1.4",
     "node-etcd": "^4.1.0",
     "titan": "^1.1.0"
