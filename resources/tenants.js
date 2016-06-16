@@ -358,6 +358,7 @@ Tenants.prototype.allocateTarget = function(env, next) {
   var tenantId = env.route.params.id;
   this._targetAllocation.lookup(tenantId, function(err, serverUrl) {
     if (err) {
+      console.error('Allocation:', err);
       env.response.statusCode = 503;
       return next(env);
     }
