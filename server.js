@@ -39,14 +39,12 @@ if (!process.env.JWT_CIPHER_TEXT) {
 
   AWS.config.update({ region: process.env.AWS_REGION });
   var kms = new AWS.KMS();
-  
-  var opts = {
+  kms.decrypt({
     CiphertextBlob: new Buffer(process.env.JWT_CIPHER_TEXT, 'hex'),
     EncryptionContext: {
       stackName: process.env.ZETTA_STACK
     }
-  };
-  kms.decrypt(opts, function(err, data) {
+  }, function(err, data) {
     if (err) {
       console.error(err);
       process.exit(1);
