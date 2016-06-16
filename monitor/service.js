@@ -90,7 +90,7 @@ MonitorService.prototype._run = function() {
     // check state for hosts that are not in etcd any more
     Object.keys(self.state).forEach(function(targetUrl) {
       var found = hosts.some(function(target) {
-        return (target.url === targetUrl);
+        return (target.privateUrl === targetUrl);
       });
 
       if (found) {
@@ -114,11 +114,11 @@ MonitorService.prototype._run = function() {
 MonitorService.prototype._updateHost = function(target, callback) {
   var self = this;
 
-  if (!this.state.hasOwnProperty(target.url)) {
-    this.state[target.url] = new TargetState(this.HealthyThreshold, this.UnHealthyThreshold);
+  if (!this.state.hasOwnProperty(target.privateUrl)) {
+    this.state[target.privateUrl] = new TargetState(this.HealthyThreshold, this.UnHealthyThreshold);
   }
 
-  var state = this.state[target.url];
+  var state = this.state[target.privateUrl];
   var opts = {
     Timeout: this.Timeout,
     jwtPlaintextKeys: this.jwtPlaintextKeys
@@ -130,7 +130,7 @@ MonitorService.prototype._updateHost = function(target, callback) {
       state.success();
     } else {
       state.fail();
-      self.log.error('Monitor Checkking target ' + target.url + ' FAILED new status ' + self.status(target.url));
+      self.log.error('Monitor Checkking target ' + target.privateUrl + ' FAILED new status ' + self.status(target.privateUrl));
     }
 
     callback();

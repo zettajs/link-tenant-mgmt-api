@@ -17,7 +17,7 @@ module.exports = function(opts, target, callback) {
   // timeout reached can also propigate an req.error when req.abort is called
   callback = once(callback);
 
-  var parsed = url.parse(target.url);
+  var parsed = url.parse(target.privateUrl); // use private url so SG can still work
   var options = {
     hostname: parsed.hostname,
     port: parsed.port,
@@ -25,7 +25,7 @@ module.exports = function(opts, target, callback) {
   };
 
   if (opts.jwtPlaintextKeys) {
-    var token = { location: target.url };
+    var token = { location: target.url }; // location needs to be publicUrl
     var cipher = jwt.sign(token, opts.jwtPlaintextKeys.internal, { expiresIn: 60 });
 
     if (!options.headers) {
