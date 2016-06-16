@@ -62,6 +62,10 @@ if (!process.env.JWT_CIPHER_TEXT) {
 
 
 function startServer() {
+
+  // Add jwt keys to clients options
+  opts.jwtPlaintextKeys = jwtPlaintextKeys;
+  
   var serviceRegistryClient = new ServiceRegistryClient(opts);
   var versionClient = new VersionClient(opts);
   var routerClient = new RouterClient(opts);

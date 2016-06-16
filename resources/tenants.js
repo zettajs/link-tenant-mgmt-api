@@ -183,6 +183,7 @@ Tenants.prototype._scaleUp = function(tenantId, size, callback) {
         var target = unallocated[i];
         var newTarget = {
           url: target.url,
+          privateUrl: target.privateUrl,
           tenantId: tenantId,
           created: target.created,
           version: target.version      
