@@ -124,7 +124,9 @@ MonitorService.prototype._updateHost = function(target, callback) {
     jwtPlaintextKeys: this.jwtPlaintextKeys
   };
 
+
   targetCheck(opts, target, function(result, err) {
+    console.log('Checked '+ target, result, (!!self.jwtPlaintextKeys));
     if (result) {
       state.success();
     } else {
