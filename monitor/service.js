@@ -86,7 +86,7 @@ MonitorService.prototype._run = function() {
       self.log.error('Monitor: Failed to gather targets. ' + err);
       return;
     }
-
+    
     // check state for hosts that are not in etcd any more
     Object.keys(self.state).forEach(function(targetUrl) {
       var found = hosts.some(function(target) {

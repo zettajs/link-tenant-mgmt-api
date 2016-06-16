@@ -96,7 +96,7 @@ TargetAllocation.prototype.allocate = function(tenantId, callback) {
     var allocated = results.filter(function(server) {
       if (server.tenantId === tenantId && server.version === self._currentVersion) {
         // filter by online targets
-        return self._targetMonitor.status(server.url);
+        return self._targetMonitor.status(server.privateUrl);
       }
     });
     
@@ -189,7 +189,7 @@ TargetAllocation.prototype.targets = function(tenantId) {
   }
 
   return this._servers[tenantId].filter(function(server) {
-    return server.version === self._currentVersion && self._targetMonitor.status(server.url);
+    return server.version === self._currentVersion && self._targetMonitor.status(server.privateUrl);
   });
 };
 
