@@ -114,9 +114,10 @@ TargetAllocation.prototype.allocate = function(tenantId, callback) {
     if (!target) {
       return callback(new Error('No available target servers for tenant `' + tenantId + '`.'));
     }
-
+    
     var newRecord = {
       url: target.url,
+      privateUrl: target.privateUrl,
       tenantId: tenantId,
       created: target.created,
       version: target.version
