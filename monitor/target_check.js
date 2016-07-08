@@ -32,7 +32,7 @@ module.exports = function(opts, target, callback) {
       options.headers = {};
     }
     
-    options.headers['x-apigee-iot-jwt'] = cipher;
+    options.headers['Authorization'] = cipher;
   }
 
   var req = http.request(options, function(res) {
