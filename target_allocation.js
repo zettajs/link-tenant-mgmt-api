@@ -77,7 +77,7 @@ TargetAllocation.prototype._lookup = function(tenantId, maxTargets, callback) {
     return;
   } else {
     var server = servers[this.serverIndexes[tenantId]++ % servers.length];
-    return callback(null, server.url);
+    return callback(null, server.publicUrl);
   }
 };
 
@@ -96,7 +96,7 @@ TargetAllocation.prototype.allocate = function(tenantId, callback) {
     var allocated = results.filter(function(server) {
       if (server.tenantId === tenantId && server.version === self._currentVersion) {
         // filter by online targets
-        return self._targetMonitor.status(server.privateUrl);
+        return self._targetMonitor.status(server.url);
       }
     });
     
@@ -117,7 +117,7 @@ TargetAllocation.prototype.allocate = function(tenantId, callback) {
     
     var newRecord = {
       url: target.url,
-      privateUrl: target.privateUrl,
+      publicUrl: target.publicUrl,
       tenantId: tenantId,
       created: target.created,
       version: target.version
@@ -189,7 +189,7 @@ TargetAllocation.prototype.targets = function(tenantId) {
   }
 
   return this._servers[tenantId].filter(function(server) {
-    return server.version === self._currentVersion && self._targetMonitor.status(server.privateUrl);
+    return server.version === self._currentVersion && self._targetMonitor.status(server.url);
   });
 };
 

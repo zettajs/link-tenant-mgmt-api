@@ -17,7 +17,7 @@ module.exports = function(opts, target, callback) {
   // timeout reached can also propigate an req.error when req.abort is called
   callback = once(callback);
 
-  var parsed = url.parse(target.privateUrl); // use private url so SG can still work
+  var parsed = url.parse(target.url); // use private url so SG can still work
   var options = {
     hostname: parsed.hostname,
     port: parsed.port,

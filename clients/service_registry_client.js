@@ -95,7 +95,7 @@ ServiceRegistry.prototype.allocate = function(type, oldRecord, newRecord, cb) {
     type: type,
     tenantId: oldRecord.tenantId,
     url: oldRecord.url,
-    privateUrl: oldRecord.privateUrl,
+    publicUrl: oldRecord.publicUrl,
     created: oldRecord.created,
     version: oldRecord.version
   };
@@ -104,7 +104,7 @@ ServiceRegistry.prototype.allocate = function(type, oldRecord, newRecord, cb) {
     type: type,
     tenantId: newRecord.tenantId,
     url: newRecord.url,
-    privateUrl: newRecord.privateUrl,
+    publicUrl: newRecord.publicUrl,
     created: newRecord.created,
     version: newRecord.version
   };
