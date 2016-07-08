@@ -161,7 +161,7 @@ ServiceRegistry.prototype.restart = function(serverUrl, cb) {
       opts.headers = {};
     }
     
-    opts.headers['x-apigee-iot-jwt'] = cipher;
+    opts.headers['Authorization'] = cipher;
   }
 
   var req = http.request(opts, function(response) {
