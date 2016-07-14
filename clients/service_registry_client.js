@@ -3,12 +3,15 @@ var url = require('url');
 var EventEmitter = require('events').EventEmitter;
 var util = require('util');
 var http = require('http');
+var jwt = require('jsonwebtoken');
 
 var ServiceRegistry = module.exports = function(options) {
   EventEmitter.call(this);
   var self = this;
   this._etcDirectory = '/services/zetta';
 
+  this.jwtPlaintextKeys = options.jwtPlaintextKeys;
+  
   if(!options.client) {
     this._client = new Etcd(options.host);
   } else {
@@ -92,6 +95,7 @@ ServiceRegistry.prototype.allocate = function(type, oldRecord, newRecord, cb) {
     type: type,
     tenantId: oldRecord.tenantId,
     url: oldRecord.url,
+    publicUrl: oldRecord.publicUrl,
     created: oldRecord.created,
     version: oldRecord.version
   };
@@ -100,6 +104,7 @@ ServiceRegistry.prototype.allocate = function(type, oldRecord, newRecord, cb) {
     type: type,
     tenantId: newRecord.tenantId,
     url: newRecord.url,
+    publicUrl: newRecord.publicUrl,
     created: newRecord.created,
     version: newRecord.version
   };
@@ -148,6 +153,16 @@ ServiceRegistry.prototype.restart = function(serverUrl, cb) {
     method: 'DELETE'
   };
 
+  if (this.jwtPlaintextKeys) {
+    var token = { location: serverUrl }; // location needs to be publicUrl
+    var cipher = jwt.sign(token, this.jwtPlaintextKeys.internal, { expiresIn: 60 });
+
+    if (!opts.headers) {
+      opts.headers = {};
+    }
+    
+    opts.headers['Authorization'] = cipher;
+  }
 
   var req = http.request(opts, function(response) {
     if(response.statusCode !== 204) {
