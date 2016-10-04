@@ -1,7 +1,7 @@
 var TargetAllocation = module.exports = function(serviceRegistryClient, versionClient, targetMonitor) {
   var self = this;
   
-  this.maxTargets = 2; // max number of targets allocated per tenant
+  this.maxTargets = Number(process.env.TARGETS_PER_TENANT) || 2; // max number of targets allocated per tenant
   this.serverIndexes = {};  // { <tenantId>: Int }
   this.pending = {}; // <tenantId> : [cb]
 
