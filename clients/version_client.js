@@ -12,17 +12,6 @@ var VersionClient = module.exports = function(options) {
   } else {
     this._client = options.client;
   }
-
-  this._watcher = this._client.watcher(this._etcdDirectory, null, { consistent: true });
-  this._watcher.on('change', function(results) {
-    var versionObject = null;
-    try {
-      versionObject = JSON.parse(results.node.value);      
-    } catch(err) {
-      return;
-    }
-    self.emit('change', versionObject); 
-  });
 }
 util.inherits(VersionClient, EventEmitter);
 
