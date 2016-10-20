@@ -14,17 +14,6 @@ var RouterClient = module.exports = function(options) {
   }  
   
   this._ttl = 120; // seconds
-  this._watcher = this._client.watcher(this._etcDirectory, null, { recursive: true, consistent: true });
-  this._watcher.on('change', function() {
-    self.findAll(function(err, results) {
-      if(err) {
-        console.error(err);
-        return;
-      }
-      
-      self.emit('change', results);  
-    });
-  });
 };
 util.inherits(RouterClient, EventEmitter);
 
