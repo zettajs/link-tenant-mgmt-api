@@ -358,7 +358,7 @@ Tenants.prototype.del = function(env, next) {
 Tenants.prototype.allocateTarget = function(env, next) {
   var tenantId = env.route.params.id;
   this._targetAllocation.lookup(tenantId, function(err, serverUrl) {
-    if (err) {
+    if (err || !serverUrl) {
       env.response.statusCode = 503;
       return next(env);
     }
