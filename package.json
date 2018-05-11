@@ -1,5 +1,5 @@
 {
-  "name": "",
+  "name": "link-tenant-mgmt-api",
   "private": true,
   "version": "0.0.1",
   "description": "",
@@ -7,8 +7,8 @@
   "scripts": {
     "test": "./node_modules/.bin/mocha"
   },
-  "author": "",
-  "license": "ISC",
+  "author": "Adam Magaluk <AdamMagaluk@google.com>",
+  "license": "Apache-2.0",
   "dependencies": {
     "argo-formatter-siren": "0.0.0",
     "async": "^1.4.2",
